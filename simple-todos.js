@@ -39,13 +39,32 @@ if (Meteor.isClient) {
  Template.task.events({
   "click .toggle-checked": function () {
     // Set the checked property to the opposite of its current value
-    Tasks.update(this._id, {$set: {checked: ! this.checked}});
+    Meteor.call("setChecked", this._id, ! this.checked);
   },
   "click .delete": function () {
-    Tasks.remove(this._id);
+    Meteor.call("deleteTask", this._id)
   }
 });
  Accounts.ui.config({
   passwordSignupFields: "USERNAME_ONLY"
+ });
+ Meteor.methods({
+  addTask: function (text) {
+    if (! Meteor.userId()){
+      throw new Meteor.Error("not-authorized");
+    }
+    Meteor.call("addTask", text)({
+      text: text,
+      createdAt: new Date(),
+      owner: Meteor.userId(),
+      username: Meter.user().username
+    });
+  },
+  deleteTask: function (taskId) {
+    Tasks.remove(taskId);
+  },
+  setChecked: function (taskId, setChecked) {
+    TMeteor.call("setChecked", this._id, ! this.checked);
+  }
  })
 }
